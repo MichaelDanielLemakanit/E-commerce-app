@@ -9,22 +9,22 @@
     <h2 style="font-size: 1.3rem; color: var(--primary-teal, #00A896); text-align: center; margin-bottom: 20px;">Owner Portal</h2>
 
     <div class="auth-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color, #e0e0e0);">
-        <form action="/signup" method="POST">
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px;">Admin Email</label>
-                <input type="email" name="email" placeholder="addiestoreadmin@gmail.com" required 
-                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
-            </div>
+        <!-- Update this line -->
+        <form action="{{ url_for('signup') }}" method="POST">
             
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px;">Password</label>
-                <input type="password" name="password" placeholder="Enter password" required 
-                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+            <div style="margin-bottom: 12px;">
+                <label>Email</label>
+                <input type="email" name="email" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
             </div>
         
-            <button type="submit" 
-                style="width: 100%; padding: 12px; background: var(--primary-teal, #00A896); color: white; border: none; border-radius: 20px; font-weight: bold; cursor: pointer;">
-                Log In as Admin
+            <div style="margin-bottom: 12px;">
+                <label>Password</label>
+                <input type="password" name="password" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+            </div>
+        
+            <!-- Ensure your button type is 'submit' -->
+            <button type="submit" style="width: 100%; padding: 10px; background: #00A896; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                Login
             </button>
         </form>
     </div>
