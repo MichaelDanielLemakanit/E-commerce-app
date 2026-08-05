@@ -257,11 +257,11 @@ def signup():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        # Adjust your actual admin credentials check
-        if email == "admin@example.com" and password == "yourpassword":
+        # Replace with your desired admin credentials
+        if email == "admin@gmail.com" and password == "1234":
             session["is_admin"] = True
             flash("Admin logged in successfully!", "success")
-            return redirect(url_for("view_orders"))
+            return redirect(url_for("view_orders"))  # Redirects to /admin/orders
         else:
             session["is_admin"] = False
             flash("Invalid Admin Email or Password!", "error")
