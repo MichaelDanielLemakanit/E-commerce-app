@@ -1,5 +1,6 @@
 import os
 import urllib.parse
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -26,7 +27,8 @@ ORDERS = [
         "address": "Nairobi, Kenya",
         "total": 42.63,
         "status": "Pending",
-        "items": ["Zogaa Flame Sweater x1"]
+        "items": ["Zogaa Flame Sweater x1"],
+        "created_at": "2026-08-05 14:30"
     }
 ]
 
@@ -123,7 +125,7 @@ def categories():
     all_brands = sorted(list(set(p["brand"] for p in PRODUCTS if "brand" in p)))
     return render_template("categories.html", categories=all_categories, brands=all_brands)
 
-# --- CART & pt ROUTES ---
+# --- CART & CHECKOUT ROUTES ---
 
 @app.route("/cart")
 def view_cart():
@@ -213,8 +215,10 @@ def checkout_cart_whatsapp():
 
     items_text = "\n".join(order_lines)
 
-    # Save order to admin view
+    # Save order with current date & timestamp
     new_order_id = max([o["id"] for o in ORDERS], default=100) + 1
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+
     ORDERS.append({
         "id": new_order_id,
         "customer_name": customer_name,
@@ -222,7 +226,8 @@ def checkout_cart_whatsapp():
         "address": address,
         "total": total_price,
         "status": "Pending",
-        "items": order_lines
+        "items": order_lines,
+        "created_at": current_time
     })
 
     order_text = (
@@ -249,18 +254,19 @@ def checkout_cart_whatsapp():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
+        email = request.form.get("email")
         password = request.form.get("password")
 
-        # Validate exact email and password credentials
-        if email == "addiestoreadmin@gmail.com" and password == "admin123":
+        # Adjust your actual admin credentials check
+        if email == "admin@example.com" and password == "yourpassword":
             session["is_admin"] = True
-            flash("Welcome back, Admin!", "success")
-            return redirect(url_for("admin_dashboard"))
+            flash("Admin logged in successfully!", "success")
+            return redirect(url_for("view_orders"))
         else:
+            session["is_admin"] = False
             flash("Invalid Admin Email or Password!", "error")
             return redirect(url_for("signup"))
-        
+
     return render_template("signup.html")
 
 @app.route("/admin")
@@ -270,11 +276,90 @@ def admin_dashboard():
     return render_template("admin_dashboard.html", products=PRODUCTS, orders=ORDERS)
 
 @app.route("/admin/orders")
-@app.route("/orders")
 def view_orders():
+    # Strict admin check
     if not session.get("is_admin"):
-        return redirect(url_for("signup"))
-    return render_template("orders.html", orders=ORDERS)
+        flash("Please log in as an administrator to access this page.", "danger")
+        return redirect(url_for("signup"))  # or your login route name
+
+    status_filter = request.args.get("status", "All")
+    
+    if status_filter == "Pending":
+        filtered_orders = [o for o in ORDERS if o.get("status") == "Pending"]
+    elif status_filter == "Completed":
+        filtered_orders = [o for o in ORDERS if o.get("status") == "Completed"]
+    else:
+        filtered_orders = ORDERS
+
+    sorted_orders = sorted(filtered_orders, key=lambda x: x["id"], reverse=True)
+    return render_template("orders.html", orders=sorted_orders, current_filter=status_filter)
+
+@app.route("/admin/add-offline-order", methods=["POST"])
+def add_offline_order():
+    # Restrict action to admin only
+    if not session.get("is_admin"):
+        flash("Unauthorized action.", "danger")
+        return redirect(url_for("admin_login"))
+
+    customer_name = request.form.get("customer_name")
+    phone = request.form.get("phone")
+    address = request.form.get("address")
+    items_input = request.form.get("items", "")
+    total = float(request.form.get("total", 0.0))
+    status = request.form.get("status", "Completed")
+
+    # Match the field name 'image_files' from HTML template
+    uploaded_images = []
+    files = request.files.getlist("image_files")[:3]
+    for file in files:
+        if file and file.filename != "" and allowed_file(file.filename):
+            uploaded_images.append(save_and_resize_image(file))
+
+    new_order_id = max([o["id"] for o in ORDERS], default=100) + 1
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    ORDERS.append({
+        "id": new_order_id,
+        "customer_name": customer_name,
+        "phone": phone,
+        "address": address,
+        "total": total,
+        "status": status,
+        "items": [items_input],
+        "images": uploaded_images,
+        "created_at": current_time
+    })
+
+    flash("Offline order logged successfully!", "success")
+    return redirect(url_for("view_orders"))
+
+@app.route("/admin/update-order-status/<int:order_id>", methods=["POST"])
+def update_order_status(order_id):
+    # Restrict action to admin only
+    if not session.get("is_admin"):
+        flash("Unauthorized action.", "danger")
+        return redirect(url_for("admin_login"))
+
+    new_status = request.form.get("status")
+    order = next((o for o in ORDERS if o["id"] == order_id), None)
+    
+    if order:
+        order["status"] = new_status
+        flash(f"Order #{order_id} status updated to {new_status}.", "success")
+
+    return redirect(request.referrer or url_for("view_orders"))
+
+@app.route("/admin/delete-order/<int:order_id>", methods=["POST"])
+def delete_order(order_id):
+    # Restrict action to admin only
+    if not session.get("is_admin"):
+        flash("Unauthorized action.", "danger")
+        return redirect(url_for("admin_login"))
+
+    global ORDERS
+    ORDERS = [o for o in ORDERS if o["id"] != order_id]
+    flash(f"Order #{order_id} deleted successfully.", "info")
+    return redirect(url_for("view_orders"))
 
 @app.route("/admin/add-product", methods=["POST"])
 def add_product():
@@ -383,8 +468,10 @@ def delete_product(product_id):
 
 @app.route("/logout")
 def logout():
-    session.clear()
-    return redirect(url_for("home"))
+    session.pop("is_admin", None)
+    session.pop("user", None)
+    flash("Logged out successfully.", "info")
+    return redirect(url_for("signup"))
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

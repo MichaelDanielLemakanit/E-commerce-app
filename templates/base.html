@@ -36,7 +36,6 @@
         {% block content %}{% endblock %}
 
         <!-- Bottom Mobile Navigation Bar -->
-        <!-- Bottom Mobile Navigation Bar -->
         <nav class="bottom-nav">
             <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">
                 <i class="fa-solid fa-house"></i>
@@ -44,15 +43,15 @@
             </a>
             
             <a href="/categories" class="nav-item {% if request.path == '/categories' %}active{% endif %}">
-                <i class="fa-solid fa-grid-2"></i>
+                <i class="fa-solid fa-list"></i>
                 <span>Category</span>
             </a>
         
             <!-- Admin-Only Orders Navigation Link -->
             {% if session.get('is_admin') %}
-            <a href="/orders" class="nav-item {% if request.path == '/orders' %}active{% endif %}">
-                <i class="fa-solid fa-receipt"></i>
-                <span>Orders</span>
+            <a href="{{ url_for('view_orders') }}" class="nav-item {% if request.path == '/admin/orders' %}active{% endif %}">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <span>Admin Orders</span>
             </a>
             {% endif %}
         
