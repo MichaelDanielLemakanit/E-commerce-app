@@ -258,7 +258,7 @@ def signup():
         password = request.form.get("password", "").strip()
 
         # Update these to match your exact admin login credentials
-        if email == "admin@gmail.com" and password == "1234":
+        if email == "addiestoreadmin@gmail.com" and password == "admin1234":
             session["is_admin"] = True
             flash("Admin logged in successfully!", "success")
             return redirect(url_for("view_orders"))  # <--- Redirects to /admin/orders
