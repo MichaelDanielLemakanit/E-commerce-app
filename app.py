@@ -12,7 +12,9 @@ UPLOAD_FOLDER = os.path.join("static", "uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Guard against read-only filesystems on Vercel
+if not os.environ.get("VERCEL"):
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 WHATSAPP_PHONE_NUMBER = "254756295128"
 
