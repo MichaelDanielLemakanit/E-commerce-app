@@ -9,7 +9,18 @@
     <h2 style="font-size: 1.3rem; color: var(--primary-teal, #00A896); text-align: center; margin-bottom: 20px;">Owner Portal</h2>
 
     <div class="auth-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color, #e0e0e0);">
-        <!-- Update this line -->
+        <!-- Display error/success messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div style="padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 0.85rem; text-align: center;
+                          background: {% if category == 'error' or category == 'danger' %}#fee2e2{% else %}#d1fae5{% endif %};
+                          color: {% if category == 'error' or category == 'danger' %}#dc2626{% else %}#047857{% endif %};">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
         <form action="{{ url_for('signup') }}" method="POST">
             
             <div style="margin-bottom: 12px;">
