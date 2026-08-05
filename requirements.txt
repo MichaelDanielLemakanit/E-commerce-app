@@ -13,6 +13,7 @@ greenlet==3.5.0
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
+Pillow
 platformdirs==4.10.0
 psycopg2-binary==2.9.12
 python-discovery==1.4.0
