@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="padding: 15px 20px;">
+    <a href="/product/{{ product.id }}" style="color: var(--text-muted); text-decoration: none;">
+        <i class="fa-solid fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div style="padding: 0 20px;">
+    <h2 style="font-size: 1.2rem; margin-bottom: 15px;">Complete Your Order</h2>
+
+    <!-- Selected Item Summary -->
+    <div style="display: flex; gap: 12px; padding: 12px; background: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
+        <img src="{{ product.image }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px;">
+        <div>
+            <strong id="product_name" style="font-size: 0.9rem;">{{ product.name }}</strong>
+            <input type="hidden" id="product_price" value="{{ product.price }}">
+            <div style="color: var(--primary-teal); font-weight: bold; font-size: 0.85rem; margin-top: 4px;">
+                ${{ "%.2f"|format(product.price) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Form -->
+    <form onsubmit="event.preventDefault(); sendOrderToWhatsApp();" class="auth-card" style="text-align: left;">
+        <div class="form-field">
+            <label>Full Name</label>
+            <input type="text" id="customer_name" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-field">
+            <label>Phone Number</label>
+            <input type="tel" id="phone" placeholder="0700000000" required>
+        </div>
+
+        <div class="form-field">
+            <label>Fulfillment / Delivery Type</label>
+            <select id="delivery_type"
+                style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <option value="Home Delivery">Home Delivery</option>
+                <option value="Store Pickup">Store Pickup</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label>Quantity</label>
+            <input type="number" id="quantity" value="1" min="1" required>
+        </div>
+
+        <div class="form-field">
+            <label>Delivery Address / Notes</label>
+            <textarea id="notes" rows="3" placeholder="Enter delivery location or special requests..."
+                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color);"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary"
+            style="background-color: #25D366; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i>
+            <span>Order via WhatsApp</span>
+        </button>
+    </form>
+</div>
+
+<!-- JavaScript pastes right here at the bottom -->
+<script>
+    function sendOrderToWhatsApp() {
+        const name = document.getElementById('customer_name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const notes = document.getElementById('notes').value.trim();
+        const delivery = document.getElementById('delivery_type').value.trim();
+        const product = document.getElementById('product_name').innerText;
+        const quantity = document.getElementById('quantity').value;
+        const pricePerUnit = parseFloat(document.getElementById('product_price').value);
+
+        const total = `$${(pricePerUnit * quantity).toFixed(2)}`;
+
+        // Inside sendOrderToWhatsApp() in checkout.html
+        const rawMessage = `Hello Addie Store!\n\n` +
+            `*New Order / Booking Request*\n` +
+            `• *Product:* ${product}\n` +
+            `• *Quantity:* ${quantity}\n` +
+            `• *Fulfillment/Type:* ${delivery}\n` +
+            `• *Total Price:* ${total}\n\n` +
+            `*Customer Details:*\n` +
+            `• *Name:* ${name}\n` +
+            `• *Phone:* ${phone}\n` +
+            `• *Notes/Address:* ${notes || 'None'}`;
+
+        const whatsappPhone = "254756295128";
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappPhone}&text=${encodeURIComponent(rawMessage)}`;
+
+        window.open(whatsappUrl, '_blank');
+    }
+</script>
+{% endblock %}

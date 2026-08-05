@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="padding: 15px 20px; padding-bottom: 80px; max-width: 600px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.2rem; margin: 0;">Edit Product #{{ product.id }}</h2>
+        <a href="/admin" style="color: var(--primary-teal, #00A896); text-decoration: none; font-size: 0.85rem; font-weight: bold;">← Back to Dashboard</a>
+    </div>
+
+    <!-- Edit Form Card -->
+    <div class="auth-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color, #eee); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        
+        <!-- Current Image Preview -->
+        <div style="text-align: center; margin-bottom: 15px;">
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 6px;">Current Product Image:</p>
+            <img src="{{ product.image }}" style="width: 100px; height: 100px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd;">
+        </div>
+
+        <form action="/admin/edit_product/{{ product.id }}" method="POST" enctype="multipart/form-data">
+            
+            <div class="form-field" style="margin-bottom: 12px;">
+                <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Product Name</label>
+                <input type="text" name="name" value="{{ product.name }}" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                <div class="form-field">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Category</label>
+                    <select name="category" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+                        <option value="Men" {% if product.category == 'Men' %}selected{% endif %}>Men</option>
+                        <option value="Women" {% if product.category == 'Women' %}selected{% endif %}>Women</option>
+                        <option value="Kids" {% if product.category == 'Kids' %}selected{% endif %}>Kids</option>
+                    </select>
+                </div>
+                
+                <div class="form-field">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Brand</label>
+                    <input type="text" name="brand" value="{{ product.brand }}" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                <div class="form-field">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Price ($)</label>
+                    <input type="number" step="0.01" name="price" value="{{ product.price }}" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+                </div>
+
+                <div class="form-field">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Stock Qty</label>
+                    <input type="number" name="stock" value="{{ product.stock }}" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+                </div>
+            </div>
+
+            <div class="form-field" style="margin-bottom: 12px;">
+                <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Product Images (Select Multiple)</label>
+                <input type="file" name="image_files" accept="image/*" multiple style="width:100%; padding:8px; border:1px solid #ccc; border-radius:8px;">
+            </div>
+
+            <div class="form-field" style="margin-bottom: 20px;">
+                <label style="display:block; font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Description</label>
+                <textarea name="description" rows="3" style="width:100%; border-radius:8px; border:1px solid #ccc; padding:8px;">{{ product.description }}</textarea>
+            </div>
+
+            <button type="submit" style="width:100%; padding:12px; background:var(--primary-teal, #00A896); color:#fff; border:none; border-radius:20px; font-weight:bold; cursor:pointer; font-size: 0.9rem;">
+                Save Changes
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

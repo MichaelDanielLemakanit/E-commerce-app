@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addie Store - E-Commerce</title>
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="app-viewport">
+
+        <header class="navbar"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border-color);">
+            <a href="/" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                <!-- Addie Store Badge -->
+                <div
+                    style="width: 38px; height: 38px; background: var(--primary-teal, #00A896); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem;">
+                    AS
+                </div>
+                <span style="font-size: 1.2rem; font-weight: 700; color: #2B2D42;">
+                    Addie <span style="color: var(--primary-teal, #00A896);">Store</span>
+                </span>
+            </a>
+
+            <div class="nav-icons">
+                <a href="/cart" style="color: var(--text-color, #2B2D42); text-decoration: none;">
+                    <i class="fa-solid fa-bag-shopping" style="font-size: 1.2rem;"></i>
+                </a>
+            </div>
+        </header>
+
+        {% block content %}{% endblock %}
+
+        <!-- Bottom Mobile Navigation Bar -->
+        <!-- Bottom Mobile Navigation Bar -->
+        <nav class="bottom-nav">
+            <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            
+            <a href="/categories" class="nav-item {% if request.path == '/categories' %}active{% endif %}">
+                <i class="fa-solid fa-grid-2"></i>
+                <span>Category</span>
+            </a>
+        
+            <!-- Admin-Only Orders Navigation Link -->
+            {% if session.get('is_admin') %}
+            <a href="/orders" class="nav-item {% if request.path == '/orders' %}active{% endif %}">
+                <i class="fa-solid fa-receipt"></i>
+                <span>Orders</span>
+            </a>
+            {% endif %}
+        
+            <a href="/signup" class="nav-item {% if request.path == '/signup' %}active{% endif %}">
+                <i class="fa-solid fa-user"></i>
+                <span>Account</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="padding: 15px 20px;">
+    <a href="/" style="color: var(--text-muted); text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Back</a>
+</div>
+
+<div style="padding: 0 20px;">
+    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; height: 240px; object-fit: cover; border-radius: 12px;">
+    
+    <div style="margin-top: 15px;">
+        <h2 style="font-size: 1.2rem; font-weight: 700;">{{ product.name }}</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <span style="font-size: 1.3rem; color: var(--primary-teal); font-weight: 800;">${{ "%.2f"|format(product.price) }}</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Stock: {{ product.stock }} pcs</span>
+        </div>
+    </div>
+
+    <!-- Proceed to Checkout Button -->
+    <div style="margin-top: 25px;">
+        <a href="/checkout/{{ product.id }}" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; background-color: #25D366;">
+            <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i>
+            <span>Proceed to Buy via WhatsApp</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

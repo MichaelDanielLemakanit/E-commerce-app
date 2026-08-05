@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="padding: 15px 20px; padding-bottom: 80px; max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.2rem; margin: 0;">Your Shopping Cart</h2>
+        <a href="/" style="color: var(--primary-teal, #00A896); text-decoration: none; font-size: 0.85rem; font-weight: bold;">← Continue Shopping</a>
+    </div>
+
+    {% if cart_items %}
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        {% for item in cart_items %}
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color, #eee);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="{{ item.image }}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+                <div>
+                    <strong style="font-size: 0.9rem; display: block;">{{ item.name }}</strong>
+                    <span style="font-size: 0.8rem; color: #666;">${{ "%.2f"|format(item.price) }} x {{ item.quantity }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <strong style="font-size: 0.95rem; color: var(--primary-teal, #00A896);">${{ "%.2f"|format(item.price * item.quantity) }}</strong>
+                
+                <form action="/remove-from-cart/{{ item.id }}" method="POST">
+                    <button type="submit" style="background: none; border: none; color: #e74c3c; font-size: 1.1rem; cursor: pointer;" title="Remove Item">🗑️</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color, #eee);">
+        <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px;">
+            <span>Total:</span>
+            <span style="color: var(--primary-teal, #00A896);">${{ "%.2f"|format(total_price) }}</span>
+        </div>
+
+        <h4 style="font-size: 0.9rem; margin-bottom: 10px;">Customer Order Details</h4>
+        <form action="/checkout-cart-whatsapp" method="POST">
+            <div style="margin-bottom: 10px;">
+                <input type="text" name="customer_name" placeholder="Full Name" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <input type="tel" name="phone" placeholder="WhatsApp Phone Number" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <input type="text" name="address" placeholder="Delivery Address / Location" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <textarea name="notes" placeholder="Notes (size, color options...)" rows="2" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;"></textarea>
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 12px; background: #25D366; color: white; border: none; border-radius: 20px; font-weight: bold; font-size: 0.95rem; cursor: pointer;">
+                📲 Complete Order on WhatsApp
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px 0;">
+        <p style="color: var(--text-muted, #777); margin-bottom: 15px;">Your cart is empty.</p>
+        <a href="/" style="padding: 10px 20px; background: var(--primary-teal, #00A896); color: white; text-decoration: none; border-radius: 20px; font-weight: bold;">Browse Catalog</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

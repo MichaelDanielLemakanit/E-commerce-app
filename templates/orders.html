@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="padding: 15px 20px 0;">
+    <h2 style="font-size: 1.2rem;">My Orders</h2>
+</div>
+
+<div class="category-tabs" style="margin-top: 10px;">
+    <a href="/orders?status=All" class="tab-btn {% if current_filter == 'All' or not current_filter %}active{% endif %}">All</a>
+    <a href="/orders?status=Unpaid" class="tab-btn {% if current_filter == 'Unpaid' %}active{% endif %}">Unpaid</a>
+    <a href="/orders?status=Shipped" class="tab-btn {% if current_filter == 'Shipped' %}active{% endif %}">Shipped</a>
+</div>
+
+{% for order in orders %}
+<div class="order-card">
+    <img src="{{ url_for('static', filename=order.image) if order.image and not order.image.startswith('http') and not order.image.startswith('/') else (order.image or '/static/images/icon.png') }}" class="order-img" alt="Order">
+    <div style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h4 style="font-size: 0.85rem; font-weight: 600;">{{ order.title or order.name or 'Order Item' }}</h4>
+            <span class="badge-status">{{ order.status or 'Pending' }}</span>
+        </div>
+        <div style="color: var(--primary-teal); font-weight: 700; font-size: 0.9rem; margin-top: 8px;">
+            ${{ "%.2f"|format(order.total_price if order.total_price is defined else order.get('price', order.get('total', 0))) }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+            Order ID: {{ order.id }}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

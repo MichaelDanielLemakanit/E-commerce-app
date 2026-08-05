@@ -1,0 +1,329 @@
+:root {
+    --primary-teal: #00a8b5;
+    --primary-dark: #008b99;
+    --primary-light: #e6f7f8;
+    --bg-light: #f4f7f8;
+    --card-bg: #ffffff;
+    --text-dark: #2c3e50;
+    --text-muted: #7f8c8d;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 15px rgba(0, 168, 181, 0.08);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    display: flex;
+    justify-content: center;
+}
+
+.app-viewport {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    background: #ffffff;
+    position: relative;
+    padding-bottom: 70px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
+}
+
+/* Header & MJ Logo */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.mj-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.mj-badge {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-teal);
+    color: white;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(0, 168, 181, 0.3);
+}
+
+.brand-text {
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 1.1rem;
+}
+
+.search-bar {
+    margin: 15px 20px;
+    position: relative;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px 15px 10px 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: var(--bg-light);
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+/* Navigation Tabs */
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px;
+    overflow-x: auto;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    padding: 6px 16px;
+    border-radius: 18px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.tab-btn.active {
+    background: var(--primary-teal);
+    color: white;
+    border-color: var(--primary-teal);
+}
+
+/* Product Cards Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 0 20px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+}
+
+.product-img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 10px;
+}
+
+.product-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-price {
+    color: var(--primary-teal);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.product-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    height: 60px;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.75rem;
+    gap: 2px;
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+}
+
+.nav-item.active {
+    color: var(--primary-teal);
+}
+
+/* Buttons */
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary-teal);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+/* Category Page Grid */
+.brand-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 15px 20px;
+}
+
+.brand-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    text-decoration: none; /* Removes underline for <a> tags */
+    color: inherit;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.brand-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-teal);
+}
+
+.brand-card h4 {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.brand-card span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Orders List */
+.order-card {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    margin: 10px 20px;
+    background: #fff;
+}
+
+.order-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.badge-status {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: var(--primary-light);
+    color: var(--primary-teal);
+    font-weight: 600;
+}
+
+/* Auth / Sign Up Screen */
+.auth-container {
+    padding: 40px 25px;
+    text-align: center;
+}
+
+.auth-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.form-field {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.form-field label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-field input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    outline: none;
+}

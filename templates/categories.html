@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="search-bar">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" placeholder="Search brands and categories...">
+</div>
+
+<div style="padding: 0 20px;">
+    <h3 style="font-size: 1rem; margin-bottom: 10px;">Brands</h3>
+</div>
+
+<div class="brand-grid">
+    {% for brand in brands %}
+    <div class="brand-card">
+        <h4>{{ brand }}</h4>
+        <span>8 Products • ★ 4.3</span>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

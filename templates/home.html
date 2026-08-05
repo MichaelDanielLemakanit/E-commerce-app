@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+/* Swipeable Non-Autoplay Carousel */
+.carousel-container {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+.carousel-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+.carousel-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    height: 100%;
+}
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 6px 9px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.75rem;
+    z-index: 2;
+}
+.carousel-btn.left { left: 5px; }
+.carousel-btn.right { right: 5px; }
+</style>
+<!-- Top Header & Floating Cart Icon -->
+<div style="padding: 15px 20px 5px; display: flex; justify-content: space-between; align-items: center;">
+    <h2 style="font-size: 1.2rem; margin: 0; color: var(--primary-teal, #00A896);">Addie Store</h2>
+    <a href="/cart" style="position: relative; text-decoration: none; color: #333; font-size: 1.2rem; background: #f0f0f0; padding: 8px 12px; border-radius: 20px; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+        🛒 <span style="font-size: 0.85rem;">Cart</span>
+        {% if cart_count > 0 %}
+        <span style="position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+            {{ cart_count }}
+        </span>
+        {% endif %}
+    </a>
+</div>
+<!-- Search Bar -->
+<form action="/" method="GET" class="search-bar" style="margin: 10px 20px;">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search catalog...">
+</form>
+{% if current_brand %}
+<div style="padding: 0 20px 10px; display: flex; align-items: center; justify-content: space-between;">
+    <span style="font-size: 0.85rem; color: var(--text-muted, #666);">
+        Filtered by Brand: <strong style="color: var(--primary-teal, #00A896);">{{ current_brand }}</strong>
+    </span>
+    <a href="/" style="font-size: 0.8rem; color: #e74c3c; text-decoration: none;">Clear Filter</a>
+</div>
+{% endif %}
+
+<!-- Recommended Category Filter Tabs -->
+<div class="category-tabs">
+    <a href="/?category=All" class="tab-btn {% if current_category == 'All' and not current_brand %}active{% endif %}">All</a>
+    <a href="/?category=Men" class="tab-btn {% if current_category == 'Men' %}active{% endif %}">Men</a>
+    <a href="/?category=Women" class="tab-btn {% if current_category == 'Women' %}active{% endif %}">Women</a>
+</div>
+
+<div style="padding: 0 20px 10px;">
+    <h3 style="font-size: 1rem; margin: 0;">Recommended For You</h3>
+</div>
+
+<div class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 20px;">
+    {% for product in products %}
+    <div class="product-card" style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+        
+        <!-- Touch Swipe & Button Navigation Carousel -->
+        <div class="carousel-container">
+            {% if product.images and product.images|length > 1 %}
+            <button class="carousel-btn left" onclick="scrollCarousel('track-{{ product.id }}', -1)">❮</button>
+            <button class="carousel-btn right" onclick="scrollCarousel('track-{{ product.id }}', 1)">❯</button>
+            {% endif %}
+
+            <div class="carousel-track" id="track-{{ product.id }}">
+                {% if product.images %}
+                    {% for img in product.images %}
+                    <div class="carousel-slide">
+                        <a href="/product/{{ product.id }}">
+                            <img src="{{ img }}" alt="{{ product.name }}">
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="carousel-slide">
+                        <a href="/product/{{ product.id }}">
+                            <img src="{{ product.image }}" alt="{{ product.name }}">
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="product-info" style="padding: 10px;">
+            <div class="product-title" style="font-weight: bold; font-size: 0.85rem;">{{ product.name }}</div>
+            <div class="product-price" style="color: #00A896; font-weight: bold;">${{ "%.2f"|format(product.price) }}</div>
+        </div>
+
+        <div style="padding: 0 10px 10px;">
+            <form action="/add-to-cart/{{ product.id }}" method="POST">
+                <button type="submit" style="width: 100%; padding: 8px; background: #00A896; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8rem; cursor: pointer;">
+                    🛒 Add to Cart
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function scrollCarousel(trackId, direction) {
+    const track = document.getElementById(trackId);
+    if (track) {
+        const slideWidth = track.clientWidth;
+        track.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
+    }
+}
+</script>
+{% endblock %}

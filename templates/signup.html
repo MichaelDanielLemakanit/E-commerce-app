@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 400px; margin: 40px auto; padding: 0 20px;">
+    <!-- Addie Store Badge Logo -->
+    <div class="as-badge" style="width: 50px; height: 50px; font-size: 1.4rem; background: var(--primary-teal, #00A896); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 15px;">
+        AS
+    </div>
+    <h2 style="font-size: 1.3rem; color: var(--primary-teal, #00A896); text-align: center; margin-bottom: 20px;">Owner Portal</h2>
+
+    <div class="auth-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color, #e0e0e0);">
+        <form action="/signup" method="POST">
+            <!-- Hidden role set to admin -->
+            <input type="hidden" name="role" value="admin">
+
+            <div class="form-field" style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Email Address</label>
+                <input type="email" name="email" placeholder="owner@addiestore.com" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #ccc);">
+            </div>
+
+            <div class="form-field" style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Admin Password</label>
+                <input type="password" name="password" placeholder="••••••••" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #ccc);">
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; background: var(--primary-teal, #00A896); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+                Login to Owner Dashboard
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
