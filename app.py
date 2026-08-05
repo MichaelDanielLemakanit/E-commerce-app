@@ -249,14 +249,16 @@ def checkout_cart_whatsapp():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        role = request.form.get("role")
+        email = request.form.get("email", "").strip().lower()
         password = request.form.get("password")
 
-        if role == "admin" and password == "admin123":
+        # Validate exact email and password credentials
+        if email == "addiestoreadmin@gmail.com" and password == "admin123":
             session["is_admin"] = True
+            flash("Welcome back, Admin!", "success")
             return redirect(url_for("admin_dashboard"))
         else:
-            flash("Invalid Admin Password!", "error")
+            flash("Invalid Admin Email or Password!", "error")
             return redirect(url_for("signup"))
         
     return render_template("signup.html")

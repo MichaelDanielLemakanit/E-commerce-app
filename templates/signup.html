@@ -10,21 +10,21 @@
 
     <div class="auth-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color, #e0e0e0);">
         <form action="/signup" method="POST">
-            <!-- Hidden role set to admin -->
-            <input type="hidden" name="role" value="admin">
-
-            <div class="form-field" style="margin-bottom: 15px;">
-                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Email Address</label>
-                <input type="email" name="email" placeholder="owner@addiestore.com" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #ccc);">
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px;">Admin Email</label>
+                <input type="email" name="email" placeholder="addiestoreadmin@gmail.com" required 
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
             </div>
-
-            <div class="form-field" style="margin-bottom: 15px;">
-                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Admin Password</label>
-                <input type="password" name="password" placeholder="••••••••" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #ccc);">
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 5px;">Password</label>
+                <input type="password" name="password" placeholder="Enter password" required 
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
             </div>
-
-            <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; background: var(--primary-teal, #00A896); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;">
-                Login to Owner Dashboard
+        
+            <button type="submit" 
+                style="width: 100%; padding: 12px; background: var(--primary-teal, #00A896); color: white; border: none; border-radius: 20px; font-weight: bold; cursor: pointer;">
+                Log In as Admin
             </button>
         </form>
     </div>

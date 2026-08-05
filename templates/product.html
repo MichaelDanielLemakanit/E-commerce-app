@@ -2,53 +2,64 @@
 
 {% block content %}
 <style>
-/* Carousel Styling */
-.carousel-container {
-    position: relative;
-    width: 100%;
-    height: 260px;
-    overflow: hidden;
-    background: #f8f9fa;
-    border-radius: 12px;
-}
-.carousel-track {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    height: 100%;
-    -webkit-overflow-scrolling: touch;
-}
-.carousel-track::-webkit-scrollbar {
-    display: none;
-}
-.carousel-slide {
-    flex: 0 0 100%;
-    scroll-snap-align: start;
-    height: 100%;
-    width: 100%;
-}
-.carousel-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-.carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 0.85rem;
-    z-index: 2;
-}
-.carousel-btn.left { left: 8px; }
-.carousel-btn.right { right: 8px; }
+    /* Carousel Styling */
+    .carousel-container {
+        position: relative;
+        width: 100%;
+        height: 260px;
+        overflow: hidden;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .carousel-track {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        height: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .carousel-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .carousel-slide {
+        flex: 0 0 100%;
+        scroll-snap-align: start;
+        height: 100%;
+        width: 100%;
+    }
+
+    .carousel-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 0.85rem;
+        z-index: 2;
+    }
+
+    .carousel-btn.left {
+        left: 8px;
+    }
+
+    .carousel-btn.right {
+        right: 8px;
+    }
 </style>
 
 <div style="padding: 15px 20px; max-width: 600px; margin: 0 auto; padding-bottom: 80px;">
@@ -62,28 +73,28 @@
     <!-- Multi-Image Carousel -->
     <div class="carousel-container">
         {% if product.images and product.images|length > 1 %}
-            <button class="carousel-btn left" onclick="scrollCarousel('track-{{ product.id }}', -1)">❮</button>
-            <button class="carousel-btn right" onclick="scrollCarousel('track-{{ product.id }}', 1)">❯</button>
+        <button class="carousel-btn left" onclick="scrollCarousel('track-{{ product.id }}', -1)">❮</button>
+        <button class="carousel-btn right" onclick="scrollCarousel('track-{{ product.id }}', 1)">❯</button>
         {% endif %}
 
         <div class="carousel-track" id="track-{{ product.id }}">
             {% if product.images %}
-                {% for img in product.images %}
-                <div class="carousel-slide">
-                    <img src="{{ img }}" alt="{{ product.name }}">
-                </div>
-                {% endfor %}
+            {% for img in product.images %}
+            <div class="carousel-slide">
+                <img src="{{ img }}" alt="{{ product.name }}">
+            </div>
+            {% endfor %}
             {% else %}
-                <div class="carousel-slide">
-                    <img src="{{ product.image }}" alt="{{ product.name }}">
-                </div>
+            <div class="carousel-slide">
+                <img src="{{ product.image }}" alt="{{ product.name }}">
+            </div>
             {% endif %}
         </div>
     </div>
 
     <!-- Product Details -->
     <div style="margin-top: 15px; margin-bottom: 20px;">
-        <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0;">{{ product.name }}</h2>
+        <h2 id="product_name" style="font-size: 1.2rem; font-weight: 700; margin: 0;">{{ product.name }}</h2>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
             <span style="font-size: 1.3rem; color: var(--primary-teal, #00A896); font-weight: 800;">
                 ${{ "%.2f"|format(product.price) }}
@@ -92,28 +103,39 @@
         </div>
     </div>
 
+    <!-- Hidden Inputs for JavaScript calculations -->
+    <input type="hidden" id="product_price" value="{{ product.price }}">
+
     <!-- Direct WhatsApp Order Form -->
     <div style="background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color, #eee);">
         <h4 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 12px; font-weight: 600;">Enter Delivery Details</h4>
-        
-        <form action="/checkout-whatsapp/{{ product.id }}" method="POST">
+
+        <form onsubmit="event.preventDefault(); sendOrderToWhatsApp();" style="text-align: left;">
             <div style="margin-bottom: 10px;">
-                <input type="text" name="customer_name" placeholder="Full Name" required 
+                <input type="text" id="customer_name" name="customer_name" placeholder="Full Name" required
                     style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;">
             </div>
-            
+
             <div style="margin-bottom: 10px;">
-                <input type="tel" name="phone" placeholder="WhatsApp Phone Number" required 
+                <input type="tel" id="phone" name="phone" placeholder="WhatsApp Phone Number" required
                     style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;">
             </div>
-            
+
             <div style="margin-bottom: 10px;">
-                <input type="text" name="address" placeholder="Delivery Address / Location" required 
+                <input type="text" id="address" name="address" placeholder="Delivery Address / Location" required
                     style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;">
             </div>
-            
+
+            <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 0.8rem; color: #666; display: block; margin-bottom: 4px;">Quantity</label>
+                    <input type="number" id="quantity" value="1" min="1" max="{{ product.stock }}" required
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;">
+                </div>
+            </div>
+
             <div style="margin-bottom: 15px;">
-                <textarea name="notes" placeholder="Notes (size, color options...)" rows="2" 
+                <textarea id="notes" name="notes" placeholder="Notes (size, color options...)" rows="2"
                     style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;"></textarea>
             </div>
 
@@ -127,12 +149,40 @@
 </div>
 
 <script>
-function scrollCarousel(trackId, direction) {
-    const track = document.getElementById(trackId);
-    if (track) {
-        const slideWidth = track.clientWidth;
-        track.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
+    function scrollCarousel(trackId, direction) {
+        const track = document.getElementById(trackId);
+        if (track) {
+            const slideWidth = track.clientWidth;
+            track.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
+        }
     }
-}
+
+    function sendOrderToWhatsApp() {
+        const name = document.getElementById('customer_name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const notes = document.getElementById('notes').value.trim();
+        const product = document.getElementById('product_name').innerText.trim();
+        const quantity = parseInt(document.getElementById('quantity').value) || 1;
+        const pricePerUnit = parseFloat(document.getElementById('product_price').value) || 0;
+
+        const total = `$${(pricePerUnit * quantity).toFixed(2)}`;
+
+        const rawMessage = `Hello Addie Store!\n\n` +
+            `*New Order*\n` +
+            `• *Product:* ${product}\n` +
+            `• *Quantity:* ${quantity}\n` +
+            `• *Total Price:* ${total}\n\n` +
+            `*Customer Details:*\n` +
+            `• *Name:* ${name}\n` +
+            `• *Phone:* ${phone}\n` +
+            `• *Address:* ${address}\n` +
+            `• *Notes:* ${notes || 'None'}`;
+
+        const whatsappPhone = "254756295128";
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappPhone}&text=${encodeURIComponent(rawMessage)}`;
+
+        window.open(whatsappUrl, '_blank');
+    }
 </script>
 {% endblock %}
