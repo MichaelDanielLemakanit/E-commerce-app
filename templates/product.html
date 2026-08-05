@@ -1,27 +1,138 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="padding: 15px 20px;">
-    <a href="/" style="color: var(--text-muted); text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Back</a>
-</div>
+<style>
+/* Carousel Styling */
+.carousel-container {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+.carousel-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+.carousel-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    height: 100%;
+    width: 100%;
+}
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.85rem;
+    z-index: 2;
+}
+.carousel-btn.left { left: 8px; }
+.carousel-btn.right { right: 8px; }
+</style>
 
-<div style="padding: 0 20px;">
-    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; height: 240px; object-fit: cover; border-radius: 12px;">
-    
-    <div style="margin-top: 15px;">
-        <h2 style="font-size: 1.2rem; font-weight: 700;">{{ product.name }}</h2>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-            <span style="font-size: 1.3rem; color: var(--primary-teal); font-weight: 800;">${{ "%.2f"|format(product.price) }}</span>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Stock: {{ product.stock }} pcs</span>
+<div style="padding: 15px 20px; max-width: 600px; margin: 0 auto; padding-bottom: 80px;">
+    <!-- Back Link -->
+    <div style="margin-bottom: 15px;">
+        <a href="/" style="color: var(--text-muted, #666); text-decoration: none;">
+            <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Multi-Image Carousel -->
+    <div class="carousel-container">
+        {% if product.images and product.images|length > 1 %}
+            <button class="carousel-btn left" onclick="scrollCarousel('track-{{ product.id }}', -1)">❮</button>
+            <button class="carousel-btn right" onclick="scrollCarousel('track-{{ product.id }}', 1)">❯</button>
+        {% endif %}
+
+        <div class="carousel-track" id="track-{{ product.id }}">
+            {% if product.images %}
+                {% for img in product.images %}
+                <div class="carousel-slide">
+                    <img src="{{ img }}" alt="{{ product.name }}">
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="carousel-slide">
+                    <img src="{{ product.image }}" alt="{{ product.name }}">
+                </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Proceed to Checkout Button -->
-    <div style="margin-top: 25px;">
-        <a href="/checkout/{{ product.id }}" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; background-color: #25D366;">
-            <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i>
-            <span>Proceed to Buy via WhatsApp</span>
-        </a>
+    <!-- Product Details -->
+    <div style="margin-top: 15px; margin-bottom: 20px;">
+        <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0;">{{ product.name }}</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <span style="font-size: 1.3rem; color: var(--primary-teal, #00A896); font-weight: 800;">
+                ${{ "%.2f"|format(product.price) }}
+            </span>
+            <span style="font-size: 0.85rem; color: var(--text-muted, #777);">Stock: {{ product.stock }} pcs</span>
+        </div>
+    </div>
+
+    <!-- Direct WhatsApp Order Form -->
+    <div style="background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color, #eee);">
+        <h4 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 12px; font-weight: 600;">Enter Delivery Details</h4>
+        
+        <form action="/checkout-whatsapp/{{ product.id }}" method="POST">
+            <div style="margin-bottom: 10px;">
+                <input type="text" name="customer_name" placeholder="Full Name" required 
+                    style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;">
+            </div>
+            
+            <div style="margin-bottom: 10px;">
+                <input type="tel" name="phone" placeholder="WhatsApp Phone Number" required 
+                    style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;">
+            </div>
+            
+            <div style="margin-bottom: 10px;">
+                <input type="text" name="address" placeholder="Delivery Address / Location" required 
+                    style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <textarea name="notes" placeholder="Notes (size, color options...)" rows="2" 
+                    style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing: border-box;"></textarea>
+            </div>
+
+            <button type="submit" 
+                style="width: 100%; padding: 12px; background: #25D366; color: white; border: none; border-radius: 20px; font-weight: bold; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i>
+                <span>Order via WhatsApp</span>
+            </button>
+        </form>
     </div>
 </div>
+
+<script>
+function scrollCarousel(trackId, direction) {
+    const track = document.getElementById(trackId);
+    if (track) {
+        const slideWidth = track.clientWidth;
+        track.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
+    }
+}
+</script>
 {% endblock %}

@@ -123,7 +123,7 @@ def categories():
     all_brands = sorted(list(set(p["brand"] for p in PRODUCTS if "brand" in p)))
     return render_template("categories.html", categories=all_categories, brands=all_brands)
 
-# --- CART & CHECKOUT ROUTES ---
+# --- CART & pt ROUTES ---
 
 @app.route("/cart")
 def view_cart():
