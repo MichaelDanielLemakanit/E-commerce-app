@@ -1,12 +1,12 @@
 import os
 import urllib.parse
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
 
 app = Flask(__name__)
-app.secret_key = "addie_store_secret_key"
+app.secret_key = os.environ.get("SECRET_KEY", "addie_store_secret_key_98765")
 
 # Configure Upload Folder for Product Images
 UPLOAD_FOLDER = os.path.join("static", "uploads")
@@ -73,18 +73,21 @@ def save_and_resize_image(file):
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     
-    img = Image.open(file)
-    img = img.convert("RGB")
-    
-    target_size = (600, 600)
-    img.thumbnail(target_size, Image.Resampling.LANCZOS)
-    
-    background = Image.new("RGB", target_size, (255, 255, 255))
-    offset = ((target_size[0] - img.size[0]) // 2, (target_size[1] - img.size[1]) // 2)
-    background.paste(img, offset)
-    background.save(filepath, quality=90)
-    
-    return f"/static/uploads/{filename}"
+    try:
+        img = Image.open(file)
+        img = img.convert("RGB")
+        
+        target_size = (600, 600)
+        img.thumbnail(target_size, Image.Resampling.LANCZOS)
+        
+        background = Image.new("RGB", target_size, (255, 255, 255))
+        offset = ((target_size[0] - img.size[0]) // 2, (target_size[1] - img.size[1]) // 2)
+        background.paste(img, offset)
+        background.save(filepath, quality=90)
+        return f"/static/uploads/{filename}"
+    except Exception:
+        # Fallback placeholder if local disk writing fails on serverless environments
+        return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"
 
 @app.context_processor
 def inject_cart_count():
@@ -189,6 +192,7 @@ def checkout():
     cart_items = list(cart.values())
     total_price = sum(item["price"] * item["quantity"] for item in cart_items)
     return render_template("checkout.html", cart_items=cart_items, total_price=total_price)
+
 @app.route("/profile")
 def user_profile():
     user_data = {
@@ -201,20 +205,12 @@ def user_profile():
 
 @app.route("/api/ai-chat", methods=["POST"])
 def ai_chat():
-    user_message = request.json.get("message", "")
-    # Add lightweight AI recommendation logic or bot response here
-    bot_reply = f"I'm here to help! You searched for: '{user_message}'. Let me check available catalog items for you."
-    return jsonify({"response": bot_reply})
-
-@app.route("/api/ai-chat", methods=["POST"])
-def ai_chat():
     data = request.get_json() or {}
     user_msg = data.get("message", "").strip().lower()
 
     if not user_msg:
         return jsonify({"response": "Please type a message so I can assist you!"})
 
-    # Smart Keyword Responses
     if "order" in user_msg or "buy" in user_msg or "how" in user_msg:
         reply = "To place an order, select a product from the home page, click 'Add to Cart', and proceed to checkout using M-Pesa or Addie Pay Escrow."
     elif "track" in user_msg or "status" in user_msg:
@@ -253,7 +249,6 @@ def checkout_cart_whatsapp():
 
     items_text = "\n".join(order_lines)
 
-    # Save order with current date & timestamp
     new_order_id = max([o["id"] for o in ORDERS], default=100) + 1
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -295,15 +290,14 @@ def signup():
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "").strip()
 
-        # Update these to match your exact admin login credentials
         if email == "addiestoreadmin@gmail.com" and password == "admin1234":
             session["is_admin"] = True
             flash("Admin logged in successfully!", "success")
-            return redirect(url_for("view_orders"))  # <--- Redirects to /admin/orders
+            return redirect(url_for("view_orders"))
         else:
             session["is_admin"] = False
             flash("Invalid Admin Email or Password!", "error")
-            return redirect(url_for("signup"))       # <--- Reloads signup on wrong input
+            return redirect(url_for("signup"))
 
     return render_template("signup.html")
 
@@ -315,10 +309,9 @@ def admin_dashboard():
 
 @app.route("/admin/orders")
 def view_orders():
-    # Strict admin check
     if not session.get("is_admin"):
         flash("Please log in as an administrator to access this page.", "danger")
-        return redirect(url_for("signup"))  # or your login route name
+        return redirect(url_for("signup"))
 
     status_filter = request.args.get("status", "All")
     
@@ -334,10 +327,9 @@ def view_orders():
 
 @app.route("/admin/add-offline-order", methods=["POST"])
 def add_offline_order():
-    # Restrict action to admin only
     if not session.get("is_admin"):
         flash("Unauthorized action.", "danger")
-        return redirect(url_for("admin_login"))
+        return redirect(url_for("signup"))
 
     customer_name = request.form.get("customer_name")
     phone = request.form.get("phone")
@@ -346,7 +338,6 @@ def add_offline_order():
     total = float(request.form.get("total", 0.0))
     status = request.form.get("status", "Completed")
 
-    # Match the field name 'image_files' from HTML template
     uploaded_images = []
     files = request.files.getlist("image_files")[:3]
     for file in files:
@@ -373,10 +364,9 @@ def add_offline_order():
 
 @app.route("/admin/update-order-status/<int:order_id>", methods=["POST"])
 def update_order_status(order_id):
-    # Restrict action to admin only
     if not session.get("is_admin"):
         flash("Unauthorized action.", "danger")
-        return redirect(url_for("admin_login"))
+        return redirect(url_for("signup"))
 
     new_status = request.form.get("status")
     order = next((o for o in ORDERS if o["id"] == order_id), None)
@@ -389,10 +379,9 @@ def update_order_status(order_id):
 
 @app.route("/admin/delete-order/<int:order_id>", methods=["POST"])
 def delete_order(order_id):
-    # Restrict action to admin only
     if not session.get("is_admin"):
         flash("Unauthorized action.", "danger")
-        return redirect(url_for("admin_login"))
+        return redirect(url_for("signup"))
 
     global ORDERS
     ORDERS = [o for o in ORDERS if o["id"] != order_id]
