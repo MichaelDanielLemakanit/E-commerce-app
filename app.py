@@ -173,11 +173,13 @@ def add_to_cart(product_id):
     return redirect(request.referrer or url_for("home"))
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
-    # Find product by ID in your PRODUCTS list or database
-    product = next((p for p in PRODUCTS if p["id"] == product_id), None)
+    products_list = globals().get("PRODUCTS", [])
+    product = next((p for p in products_list if p.get("id") == product_id), None)
+    
     if not product:
         flash("Product not found.", "warning")
         return redirect(url_for("home"))
+        
     return render_template("product.html", product=product)
 
 @app.route("/remove-from-cart/<int:product_id>", methods=["POST"])
