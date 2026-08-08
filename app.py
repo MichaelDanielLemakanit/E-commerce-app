@@ -206,6 +206,28 @@ def ai_chat():
     bot_reply = f"I'm here to help! You searched for: '{user_message}'. Let me check available catalog items for you."
     return jsonify({"response": bot_reply})
 
+@app.route("/api/ai-chat", methods=["POST"])
+def ai_chat():
+    data = request.get_json() or {}
+    user_msg = data.get("message", "").strip().lower()
+
+    if not user_msg:
+        return jsonify({"response": "Please type a message so I can assist you!"})
+
+    # Smart Keyword Responses
+    if "order" in user_msg or "buy" in user_msg or "how" in user_msg:
+        reply = "To place an order, select a product from the home page, click 'Add to Cart', and proceed to checkout using M-Pesa or Addie Pay Escrow."
+    elif "track" in user_msg or "status" in user_msg:
+        reply = "You can view and track your current orders in the 'Admin Orders' section or under your account profile dashboard."
+    elif "mpesa" in user_msg or "pay" in user_msg:
+        reply = "Addie Store supports direct M-Pesa STK push checkout as well as Addie Pay Escrow for buyer protection."
+    elif "hello" in user_msg or "hi" in user_msg or "hey" in user_msg:
+        reply = "Hello! I am your Addie Store Assistant. How can I help you shop or manage orders today?"
+    else:
+        reply = f"I received your question: '{user_msg}'. Our support team and store AI recommendation engine are actively tracking this inventory line."
+
+    return jsonify({"response": reply})
+
 @app.route("/checkout-cart-whatsapp", methods=["POST"])
 def checkout_cart_whatsapp():
     cart = session.get("cart", {})

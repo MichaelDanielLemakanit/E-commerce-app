@@ -69,30 +69,86 @@
 
     <div id="ai-chat-window" style="display: none; position: absolute; bottom: 65px; right: 0; width: 320px; height: 420px; background: #fff; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #eee;">
         <div style="background: #00A896; color: #fff; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-            <span><i class="fa-solid fa-sparkles"></i> Addie AI Assistant</span>
-            <span id="ai-close-btn" style="cursor: pointer;">&times;</span>
+            <span><i class="fa-solid fa-robot"></i> Addie AI Assistant</span>
+            <span id="ai-close-btn" style="cursor: pointer; font-size: 1.2rem;">&times;</span>
         </div>
-        <div id="ai-messages" style="flex: 1; padding: 12px; overflow-y: auto; font-size: 0.88rem;">
-            <div style="background: #f0f2f5; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; max-width: 85%;">
+        
+        <div id="ai-messages" style="flex: 1; padding: 12px; overflow-y: auto; font-size: 0.88rem; display: flex; flex-direction: column; gap: 8px;">
+            <div style="background: #f0f2f5; padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-start; color: #333;">
                 Hi! How can I help you discover products or track your order today?
             </div>
         </div>
+        
         <div style="padding: 10px; border-top: 1px solid #eee; display: flex; gap: 6px;">
-            <input type="text" id="ai-input" placeholder="Ask AI..." style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem;">
-            <button id="ai-send-btn" style="background: #00A896; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-paper-plane"></i></button>
+            <input type="text" id="ai-input" placeholder="Ask AI..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; outline: none;">
+            <button id="ai-send-btn" style="background: #00A896; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
     const toggleBtn = document.getElementById('ai-toggle-btn');
     const chatWindow = document.getElementById('ai-chat-window');
     const closeBtn = document.getElementById('ai-close-btn');
+    const sendBtn = document.getElementById('ai-send-btn');
+    const inputField = document.getElementById('ai-input');
+    const messagesContainer = document.getElementById('ai-messages');
 
+    // Toggle Chat Window
     toggleBtn.addEventListener('click', () => {
-        chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+        chatWindow.style.display = chatWindow.style.display === 'none' || chatWindow.style.display === '' ? 'flex' : 'none';
     });
     closeBtn.addEventListener('click', () => chatWindow.style.display = 'none');
+
+    // Send Message Function
+    async function sendMessage() {
+        const text = inputField.value.trim();
+        if (!text) return;
+
+        // Append User Message
+        const userBubble = document.createElement('div');
+        userBubble.style.cssText = 'background: #00A896; color: white; padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-end; word-break: break-word;';
+        userBubble.textContent = text;
+        messagesContainer.appendChild(userBubble);
+
+        inputField.value = '';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        try {
+            const response = await fetch('/api/ai-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+
+            // Append Bot Response
+            const botBubble = document.createElement('div');
+            botBubble.style.cssText = 'background: #f0f2f5; color: #333; padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-start; word-break: break-word;';
+            botBubble.textContent = data.response;
+            messagesContainer.appendChild(botBubble);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        } catch (error) {
+            console.error('Error:', error);
+            const errorBubble = document.createElement('div');
+            errorBubble.style.cssText = 'background: #fee2e2; color: #dc2626; padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-start;';
+            errorBubble.textContent = 'Server connection failed. Make sure Flask is running.';
+            messagesContainer.appendChild(errorBubble);
+        }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    inputField.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+});
 </script>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
