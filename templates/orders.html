@@ -45,16 +45,36 @@
                 <strong>Address:</strong> {{ order.address }}
             </div>
 
-            <!-- Items Purchased -->
+            <!-- Items Purchased (UPDATED WITH PRODUCT LINKS) -->
             <div style="background: #f9f9f9; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 10px;">
                 <strong>Items:</strong>
                 <ul style="margin: 4px 0 0 0; padding-left: 18px;">
                     {% if order['items'] is sequence and order['items'] is not string %}
                         {% for item in order['items'] %}
-                            <li>{{ item }}</li>
+                            <li>
+                                {% if order.get('product_id') %}
+                                    <a href="{{ url_for('product_detail', product_id=order.product_id) }}" style="color: var(--primary-teal, #00A896); text-decoration: none; font-weight: 600;">
+                                        {{ item }}
+                                    </a>
+                                {% elif item is mapping and item.get('id') %}
+                                    <a href="{{ url_for('product_detail', product_id=item.id) }}" style="color: var(--primary-teal, #00A896); text-decoration: none; font-weight: 600;">
+                                        {{ item.get('name', item) }}
+                                    </a>
+                                {% else %}
+                                    {{ item }}
+                                {% endif %}
+                            </li>
                         {% endfor %}
                     {% else %}
-                        <li>{{ order['items'] }}</li>
+                        <li>
+                            {% if order.get('product_id') %}
+                                <a href="{{ url_for('product_detail', product_id=order.product_id) }}" style="color: var(--primary-teal, #00A896); text-decoration: none; font-weight: 600;">
+                                    {{ order['items'] }}
+                                </a>
+                            {% else %}
+                                {{ order['items'] }}
+                            {% endif %}
+                        </li>
                     {% endif %}
                 </ul>
 

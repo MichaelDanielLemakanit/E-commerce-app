@@ -171,6 +171,13 @@ def add_to_cart(product_id):
     session.modified = True
     flash(f"Added {product['name']} to cart!", "success")
     return redirect(request.referrer or url_for("home"))
+@app.route("/product/<int:product_id>")
+def product_detail(product_id):
+    product = next((p for p in PRODUCTS if p["id"] == product_id), None)
+    if not product:
+        flash("Product not found.", "error")
+        return redirect(url_for("home"))
+    return render_template("product.html", product=product)
 
 @app.route("/remove-from-cart/<int:product_id>", methods=["POST"])
 def remove_from_cart(product_id):

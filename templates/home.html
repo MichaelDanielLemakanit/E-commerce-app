@@ -72,7 +72,16 @@
     <a href="/" style="font-size: 0.8rem; color: #e74c3c; text-decoration: none;">Clear Filter</a>
 </div>
 {% endif %}
-
+<!-- Inside your product loop in home.html -->
+{% for product in products %}
+<div class="product-card">
+    <a href="{{ url_for('product_detail', product_id=product.id) }}" style="text-decoration: none; color: inherit;">
+        <img src="{{ product.images[0] if product.images else product.image }}" alt="{{ product.name }}">
+        <h3>{{ product.name }}</h3>
+        <p class="price">${{ "%.2f"|format(product.price) }}</p>
+    </a>
+</div>
+{% endfor %}
 <!-- Recommended Category Filter Tabs -->
 <div class="category-tabs">
     <a href="/?category=All" class="tab-btn {% if current_category == 'All' and not current_brand %}active{% endif %}">All</a>
