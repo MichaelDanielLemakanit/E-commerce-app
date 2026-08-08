@@ -61,6 +61,39 @@
             </a>
         </nav>
     </div>
+    <!-- Floating AI Assistant Widget -->
+<div id="ai-assistant" style="position: fixed; bottom: 85px; right: 20px; z-index: 1000;">
+    <button id="ai-toggle-btn" style="background: #00A896; color: white; border: none; border-radius: 50%; width: 55px; height: 55px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 1.4rem; cursor: pointer;">
+        <i class="fa-solid fa-robot"></i>
+    </button>
+
+    <div id="ai-chat-window" style="display: none; position: absolute; bottom: 65px; right: 0; width: 320px; height: 420px; background: #fff; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #eee;">
+        <div style="background: #00A896; color: #fff; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa-solid fa-sparkles"></i> Addie AI Assistant</span>
+            <span id="ai-close-btn" style="cursor: pointer;">&times;</span>
+        </div>
+        <div id="ai-messages" style="flex: 1; padding: 12px; overflow-y: auto; font-size: 0.88rem;">
+            <div style="background: #f0f2f5; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; max-width: 85%;">
+                Hi! How can I help you discover products or track your order today?
+            </div>
+        </div>
+        <div style="padding: 10px; border-top: 1px solid #eee; display: flex; gap: 6px;">
+            <input type="text" id="ai-input" placeholder="Ask AI..." style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem;">
+            <button id="ai-send-btn" style="background: #00A896; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById('ai-toggle-btn');
+    const chatWindow = document.getElementById('ai-chat-window');
+    const closeBtn = document.getElementById('ai-close-btn');
+
+    toggleBtn.addEventListener('click', () => {
+        chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+    });
+    closeBtn.addEventListener('click', () => chatWindow.style.display = 'none');
+</script>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

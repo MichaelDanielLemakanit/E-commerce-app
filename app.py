@@ -189,6 +189,22 @@ def checkout():
     cart_items = list(cart.values())
     total_price = sum(item["price"] * item["quantity"] for item in cart_items)
     return render_template("checkout.html", cart_items=cart_items, total_price=total_price)
+@app.route("/profile")
+def user_profile():
+    user_data = {
+        "username": "Daniel Michael",
+        "trust_score": "98%",
+        "badges": ["Top Buyer", "Verified Account"],
+        "wallet_balance": 1250.00
+    }
+    return render_template("profile.html", user=user_data)
+
+@app.route("/api/ai-chat", methods=["POST"])
+def ai_chat():
+    user_message = request.json.get("message", "")
+    # Add lightweight AI recommendation logic or bot response here
+    bot_reply = f"I'm here to help! You searched for: '{user_message}'. Let me check available catalog items for you."
+    return jsonify({"response": bot_reply})
 
 @app.route("/checkout-cart-whatsapp", methods=["POST"])
 def checkout_cart_whatsapp():

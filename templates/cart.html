@@ -35,6 +35,24 @@
             <span>Total:</span>
             <span style="color: var(--primary-teal, #00A896);">${{ "%.2f"|format(total_price) }}</span>
         </div>
+        <div class="checkout-section" style="background: #fff; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #eee;">
+            <h3 style="font-size: 1rem; color: #333; margin-bottom: 10px;">Payment Method</h3>
+            
+            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer;">
+                <input type="radio" name="payment_method" value="mpesa" checked>
+                <span><strong>M-Pesa Express</strong> (STK Push)</span>
+            </label>
+        
+            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer;">
+                <input type="radio" name="payment_method" value="escrow">
+                <span><strong>Addie Pay Escrow</strong> (Funds held safely until delivery)</span>
+            </label>
+        
+            <div id="mpesa-phone-field" style="margin-top: 10px;">
+                <label style="font-size: 0.85rem; color: #666;">M-Pesa Phone Number</label>
+                <input type="tel" name="phone_number" placeholder="254712345678" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; margin-top: 4px;">
+            </div>
+        </div>
 
         <h4 style="font-size: 0.9rem; margin-bottom: 10px;">Customer Order Details</h4>
         <form action="/checkout-cart-whatsapp" method="POST">
