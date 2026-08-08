@@ -173,12 +173,11 @@ def add_to_cart(product_id):
     return redirect(request.referrer or url_for("home"))
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
-    products_list = globals().get("PRODUCTS", [])
-    product = next((p for p in products_list if p.get("id") == product_id), None)
+    products = globals().get("PRODUCTS", [])
+    product = next((p for p in products if isinstance(p, dict) and p.get("id") == product_id), None)
     
     if not product:
-        flash("Product not found.", "warning")
-        return redirect(url_for("home"))
+        return redirect("/")
         
     return render_template("product.html", product=product)
 
