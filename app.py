@@ -15,7 +15,10 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # Guard against read-only filesystems on Vercel
 if not os.environ.get("VERCEL"):
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    try:
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    except Exception:
+        pass
 
 WHATSAPP_PHONE_NUMBER = "254756295128"
 
@@ -74,6 +77,10 @@ def save_and_resize_image(file):
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     
     try:
+        # If running on Vercel, skip local disk writes to prevent read-only filesystem crash
+        if os.environ.get("VERCEL"):
+            return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"
+
         img = Image.open(file)
         img = img.convert("RGB")
         
@@ -85,14 +92,14 @@ def save_and_resize_image(file):
         background.paste(img, offset)
         background.save(filepath, quality=90)
         return f"/static/uploads/{filename}"
-    except Exception:
+    except Exception as e:
         # Fallback placeholder if local disk writing fails on serverless environments
         return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"
 
 @app.context_processor
 def inject_cart_count():
     cart = session.get("cart", {})
-    total_count = sum(item["quantity"] for item in cart.values())
+    total_count = sum(item["quantity"] for item in cart.values() if isinstance(item, dict) and "quantity" in item)
     return dict(cart_count=total_count)
 
 # --- PUBLIC / STOREFRONT ROUTES ---
@@ -103,39 +110,30 @@ def home():
     brand = request.args.get("brand")
     search_query = request.args.get("q", "").strip().lower()
     
-    available_products = [p for p in PRODUCTS if p["stock"] > 0]
+    available_products = [p for p in PRODUCTS if p.get("stock", 0) > 0]
     
     if search_query:
-        available_products = [p for p in available_products if search_query in p["name"].lower() or search_query in p["brand"].lower()]
+        available_products = [p for p in available_products if search_query in p.get("name", "").lower() or search_query in p.get("brand", "").lower()]
     if category != "All":
-        available_products = [p for p in available_products if p["category"] == category]
+        available_products = [p for p in available_products if p.get("category") == category]
     if brand:
-        available_products = [p for p in available_products if p["brand"].lower() == brand.lower()]
+        available_products = [p for p in available_products if p.get("brand", "").lower() == brand.lower()]
         
     return render_template("home.html", products=available_products, current_category=category, current_brand=brand, search_query=search_query)
 
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
     try:
-        # Safely fetch products list
-        products_list = globals().get("PRODUCTS", [])
-        
-        # Search safely
-        product = None
-        for p in products_list:
-            if isinstance(p, dict) and p.get("id") == product_id:
-                product = p
-                break
+        products = globals().get("PRODUCTS", [])
+        product = next((p for p in products if isinstance(p, dict) and p.get("id") == product_id), None)
         
         if not product:
-            flash("Product not found.", "warning")
-            return redirect("/")
+            flash("Product not found.", "error")
+            return redirect(url_for("home"))
             
         return render_template("product.html", product=product)
-
     except Exception as e:
-        print(f"Error loading product {product_id}: {e}")
-        return redirect("/")
+        return redirect(url_for("home"))
 
 @app.route("/categories")
 def categories():
@@ -149,12 +147,12 @@ def categories():
 def view_cart():
     cart = session.get("cart", {})
     cart_items = list(cart.values())
-    total_price = sum(item["price"] * item["quantity"] for item in cart_items)
+    total_price = sum(item.get("price", 0) * item.get("quantity", 0) for item in cart_items if isinstance(item, dict))
     return render_template("cart.html", cart_items=cart_items, total_price=total_price)
 
 @app.route("/add-to-cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
-    product = next((p for p in PRODUCTS if p["id"] == product_id and p["stock"] > 0), None)
+    product = next((p for p in PRODUCTS if p["id"] == product_id and p.get("stock", 0) > 0), None)
     if not product:
         flash("Product unavailable or out of stock.", "error")
         return redirect(request.referrer or url_for("home"))
@@ -165,14 +163,14 @@ def add_to_cart(product_id):
     cart = session["cart"]
     str_id = str(product_id)
 
-    current_qty = cart.get(str_id, {}).get("quantity", 0)
+    current_qty = cart.get(str_id, {}).get("quantity", 0) if isinstance(cart.get(str_id), dict) else 0
     if current_qty + 1 > product["stock"]:
         flash("Cannot add more items than available in stock.", "error")
         return redirect(request.referrer or url_for("home"))
 
     cart_img = product.get("images", [product.get("image", "")])[0]
 
-    if str_id in cart:
+    if str_id in cart and isinstance(cart[str_id], dict):
         cart[str_id]["quantity"] += 1
     else:
         cart[str_id] = {
@@ -186,15 +184,6 @@ def add_to_cart(product_id):
     session.modified = True
     flash(f"Added {product['name']} to cart!", "success")
     return redirect(request.referrer or url_for("home"))
-@app.route("/product/<int:product_id>")
-def product_detail(product_id):
-    products = globals().get("PRODUCTS", [])
-    product = next((p for p in products if isinstance(p, dict) and p.get("id") == product_id), None)
-    
-    if not product:
-        return redirect("/")
-        
-    return render_template("product.html", product=product)
 
 @app.route("/remove-from-cart/<int:product_id>", methods=["POST"])
 def remove_from_cart(product_id):
@@ -214,7 +203,7 @@ def checkout():
         return redirect(url_for("home"))
     
     cart_items = list(cart.values())
-    total_price = sum(item["price"] * item["quantity"] for item in cart_items)
+    total_price = sum(item.get("price", 0) * item.get("quantity", 0) for item in cart_items if isinstance(item, dict))
     return render_template("checkout.html", cart_items=cart_items, total_price=total_price)
 
 @app.route("/profile")
@@ -263,9 +252,11 @@ def checkout_cart_whatsapp():
     total_price = 0.0
 
     for item_id, item in cart.items():
+        if not isinstance(item, dict):
+            continue
         prod = next((p for p in PRODUCTS if p["id"] == int(item_id)), None)
         if prod:
-            qty = min(item["quantity"], prod["stock"])
+            qty = min(item.get("quantity", 1), prod.get("stock", 1))
             prod["stock"] -= qty
             subtotal = prod["price"] * qty
             total_price += subtotal
@@ -359,7 +350,10 @@ def add_offline_order():
     phone = request.form.get("phone")
     address = request.form.get("address")
     items_input = request.form.get("items", "")
-    total = float(request.form.get("total", 0.0))
+    try:
+        total = float(request.form.get("total", 0.0))
+    except ValueError:
+        total = 0.0
     status = request.form.get("status", "Completed")
 
     uploaded_images = []
@@ -420,8 +414,12 @@ def add_product():
     name = request.form.get("name")
     category = request.form.get("category")
     brand = request.form.get("brand")
-    price = float(request.form.get("price"))
-    stock = int(request.form.get("stock"))
+    try:
+        price = float(request.form.get("price", 0.0))
+        stock = int(request.form.get("stock", 0))
+    except ValueError:
+        price = 0.0
+        stock = 0
     description = request.form.get("description")
     
     uploaded_images = []
@@ -471,8 +469,11 @@ def edit_product(product_id):
         product["name"] = request.form.get("name")
         product["category"] = request.form.get("category")
         product["brand"] = request.form.get("brand")
-        product["price"] = float(request.form.get("price"))
-        product["stock"] = int(request.form.get("stock"))
+        try:
+            product["price"] = float(request.form.get("price", product.get("price", 0.0)))
+            product["stock"] = int(request.form.get("stock", product.get("stock", 0)))
+        except ValueError:
+            pass
         product["description"] = request.form.get("description")
 
         files = request.files.getlist("image_files")
@@ -501,7 +502,10 @@ def restock_product(product_id):
 
     product = next((p for p in PRODUCTS if p["id"] == product_id), None)
     if product:
-        add_stock = int(request.form.get("add_stock", 0))
+        try:
+            add_stock = int(request.form.get("add_stock", 0))
+        except ValueError:
+            add_stock = 0
         product["stock"] += add_stock
         flash(f"Added {add_stock} items to {product['name']} stock!", "success")
 
