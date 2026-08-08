@@ -116,11 +116,26 @@ def home():
 
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
-    product = next((p for p in PRODUCTS if p["id"] == product_id), None)
-    if not product:
-        flash("Product not found.", "error")
-        return redirect(url_for("home"))
-    return render_template("product.html", product=product)
+    try:
+        # Safely fetch products list
+        products_list = globals().get("PRODUCTS", [])
+        
+        # Search safely
+        product = None
+        for p in products_list:
+            if isinstance(p, dict) and p.get("id") == product_id:
+                product = p
+                break
+        
+        if not product:
+            flash("Product not found.", "warning")
+            return redirect("/")
+            
+        return render_template("product.html", product=product)
+
+    except Exception as e:
+        print(f"Error loading product {product_id}: {e}")
+        return redirect("/")
 
 @app.route("/categories")
 def categories():
